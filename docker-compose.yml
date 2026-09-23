@@ -1,0 +1,34 @@
+name: comfy-arc
+
+services:
+  comfy-arc:
+    container_name: comfy-arc
+    # Prebuilt image. To build this repo instead: docker compose build
+    image: ghcr.io/xblackbytesx/comfy-arc:${COMFY_ARC_TAG:-latest}
+    build: .
+    security_opt:
+      - no-new-privileges:true
+      - label:disable
+    ipc: host
+    ports:
+      - "${COMFY_ARC_PORT:-8188}:8188"
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      # See README.md. Defaults live in entrypoint.sh; these make them visible.
+      COMFY_SMART_MEMORY: ${COMFY_SMART_MEMORY:-off}
+      COMFY_ASYNC_OFFLOAD: ${COMFY_ASYNC_OFFLOAD:-on}
+      COMFY_CACHE: ${COMFY_CACHE:-classic}
+      COMFY_RESERVE_VRAM: ${COMFY_RESERVE_VRAM:-}
+      COMFY_VRAM_HEADROOM: ${COMFY_VRAM_HEADROOM:-}
+      COMFY_API_NODES: ${COMFY_API_NODES:-on}
+      COMFY_EXTRA_ARGS: ${COMFY_EXTRA_ARGS:-}
+    volumes:
+      - ${COMFY_ARC_DATA:-./data}:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8188/system_stats"]
+      interval: 30s
+      timeout: 5s
+      start_period: 120s
+      retries: 3
+    restart: unless-stopped

@@ -1,0 +1,10 @@
+# Version pinning is handled deliberately in this repo, not by hadolint:
+#   - dnf packages follow the pinned base image (fedora:44), which is what
+#     fixes them; pinning each rpm too would break on every base rebuild
+#   - pip installs are held by /etc/comfy-arc-constraints.txt, and the versions
+#     that matter (ComfyUI, PyTorch, each node) are ARGs and nodes.list
+#   - PIP_NO_CACHE_DIR is set once as an ENV rather than per install
+ignored:
+  - DL3041  # specify version with dnf install
+  - DL3013  # pin versions in pip install
+  - DL3042  # pip install without --no-cache-dir

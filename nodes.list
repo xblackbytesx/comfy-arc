@@ -1,0 +1,21 @@
+# Custom nodes baked into the image: <name> <git url> <commit>
+#
+# Empty on purpose: core ComfyUI covers standard workflows, and every node
+# added here is one more thing that can break a build. Add only what a workflow
+# actually needs.
+#
+# The commit is what makes a build reproducible, so pin one and never track a
+# branch (CI rejects anything that is not a full 40 character sha). To find the
+# current tip of a repo:
+#   git ls-remote https://github.com/<owner>/<repo> HEAD
+#
+# Examples, both of which the old yanwk image bundled:
+#
+#   workflow ergonomics: reroutes, group muting, seed and context nodes
+# rgthree-comfy       https://github.com/rgthree/rgthree-comfy.git      2c5342a8cb0eaecaabf61435a5f37dd594c510ba
+#
+#   large all-in-one pack: pipes, presets, loaders
+# ComfyUI-Easy-Use    https://github.com/yolain/ComfyUI-Easy-Use.git    8730ffd14044ee9392db3b192646266576bc67df
+#
+#   GGUF quantised checkpoints, useful when VRAM is tight
+# ComfyUI-GGUF        https://github.com/city96/ComfyUI-GGUF.git        <commit>

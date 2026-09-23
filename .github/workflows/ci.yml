@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: ["master", "main"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          # Rules this repo answers differently are in .hadolint.yaml.
+          failure-threshold: warning
+
+      - name: Lint shell
+        run: shellcheck entrypoint.sh
+
+      - name: Validate compose file
+        run: docker compose config --quiet
+
+      - name: Check node pins
+        # Every node line must carry a full 40 character commit, never a branch.
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The braces matter: grep exits 1 when nodes.list holds only comments,
+          # and `grep || true | while` would skip the loop entirely instead.
+          { grep -vE '^\s*(#|$)' nodes.list || true; } | while read -r name url sha; do
+            printf '%-24s %s\n' "$name" "$sha"
+            if [[ ! $sha =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::$name is not pinned to a full 40 character commit sha"
+              exit 1
+            fi
+          done

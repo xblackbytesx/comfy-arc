@@ -1,0 +1,27 @@
+# --- Local data ---
+# docker-compose.yml mounts ./data by default: models, inputs, outputs, the
+# user directory and the kernel cache all land there.
+data/
+
+# --- Environment / secrets ---
+.env
+.env.*
+!.env.example
+
+# --- IDE / assistant tooling ---
+# Local scratch directories various editors and coding assistants create in the
+# repo root. None of them belong in the history.
+.idea/
+.vscode/
+.claude/
+.cursor/
+.aider*
+.continue/
+.windsurf/
+*.swp
+*.swo
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
