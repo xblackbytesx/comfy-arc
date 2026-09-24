@@ -48,10 +48,12 @@ args=(
   --temp-directory "$TEMP_DIR"
 )
 
-# Smart memory keeps a model in VRAM after a run so the next one starts fast.
-# Turn it off to hand VRAM back between runs, which is what you want when
-# something else (an LLM server, another GPU job) shares the card.
-if ! is_on COMFY_SMART_MEMORY "${COMFY_SMART_MEMORY:-off}"; then
+# Smart memory keeps a model in VRAM after a run, so a repeat run starts at
+# once. Off instead pushes the weights back to system RAM after every run,
+# which frees VRAM sooner but re-uploads them over PCIe next time, making each
+# generation longer. Sharing the card is usually better served by finishing
+# quickly and then releasing everything, which is what COMFY_IDLE_UNLOAD does.
+if ! is_on COMFY_SMART_MEMORY "${COMFY_SMART_MEMORY:-on}"; then
   args+=(--disable-smart-memory)
 fi
 
@@ -131,6 +133,19 @@ if [[ -n ${PUID:-}${PGID:-} ]]; then
     note "running as ${puid}:${pgid} (groups ${groups})"
     run_as=(setpriv --reuid "$puid" --regid "$pgid" --groups "$groups" --inh-caps=-all --)
   fi
+fi
+
+# ComfyUI holds a model after a run and has no idle timer, so memory stays
+# taken until something asks for it back. idle-unload.sh is that something.
+idle=${COMFY_IDLE_UNLOAD:-0}
+poll=${COMFY_IDLE_POLL:-15}
+[[ $idle =~ ^[0-9]+$ ]] \
+  || die "COMFY_IDLE_UNLOAD must be a whole number of seconds (got '$idle')"
+[[ $poll =~ ^[0-9]+$ && $poll -ge 1 ]] \
+  || die "COMFY_IDLE_POLL must be a whole number of seconds, at least 1 (got '$poll')"
+if [[ $idle -gt 0 ]]; then
+  note "unloading models after ${idle}s idle (checked every ${poll}s)"
+  ${run_as[@]+"${run_as[@]}"} /usr/local/bin/idle-unload.sh &
 fi
 
 printf 'comfy-arc: python3 main.py %s %s\n' "${args[*]}" "$*"

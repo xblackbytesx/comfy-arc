@@ -111,7 +111,7 @@ ENV SYCL_CACHE_PERSISTENT=1 \
     ZES_ENABLE_SYSMAN=1 \
     PYTORCH_ENABLE_XPU_FALLBACK=1
 
-COPY --chmod=755 entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY --chmod=755 entrypoint.sh idle-unload.sh /usr/local/bin/
 
 WORKDIR /opt/comfyui
 EXPOSE 8188

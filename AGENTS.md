@@ -30,6 +30,10 @@ below exists to keep that true.
    fall back to a default.
 6. **The assembled command is printed** before exec, so a container states what
    it is running.
+7. **The idle unloader never frees while the queue is busy.** `idle-unload.sh`
+   checks `/queue` and only calls `/free` after `COMFY_IDLE_UNLOAD` seconds
+   with nothing running or pending, once per idle period. A transient failure
+   to reach the server is a skipped round, never an unload.
 7. **Privileges drop when asked, never silently.** With `PUID`/`PGID` set and
    the container started as root, `entrypoint.sh` creates that account, adds
    the group owning `/dev/dri/render*` so the GPU stays visible, chowns the

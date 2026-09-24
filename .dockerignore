@@ -1,3 +1,4 @@
 *
 !nodes.list
 !entrypoint.sh
+!idle-unload.sh

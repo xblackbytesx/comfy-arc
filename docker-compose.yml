@@ -19,7 +19,9 @@ services:
       # Own generated files as this account instead of root (unset = root).
       PUID: ${PUID:-}
       PGID: ${PGID:-}
-      COMFY_SMART_MEMORY: ${COMFY_SMART_MEMORY:-off}
+      COMFY_SMART_MEMORY: ${COMFY_SMART_MEMORY:-on}
+      COMFY_IDLE_UNLOAD: ${COMFY_IDLE_UNLOAD:-}
+      COMFY_IDLE_POLL: ${COMFY_IDLE_POLL:-}
       COMFY_ASYNC_OFFLOAD: ${COMFY_ASYNC_OFFLOAD:-on}
       COMFY_CACHE: ${COMFY_CACHE:-classic}
       COMFY_RESERVE_VRAM: ${COMFY_RESERVE_VRAM:-}

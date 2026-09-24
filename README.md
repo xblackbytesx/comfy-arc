@@ -59,7 +59,9 @@ appended to ComfyUI's command line and wins over them.
 
 | Variable | Default | Effect |
 |---|---|---|
-| `COMFY_SMART_MEMORY` | `off` | `on` keeps a model in VRAM between runs (faster repeats). `off` hands VRAM back after every run. |
+| `COMFY_SMART_MEMORY` | `on` | `on` keeps a model in VRAM between runs, so a repeat starts at once. `off` pushes the weights back to system RAM after every run: VRAM is freed sooner, **system RAM is held instead**, and each generation is slower because the weights travel back over PCIe. |
+| `COMFY_IDLE_UNLOAD` | unset | Seconds with an empty queue before models and cache are released. Unset or `0` never releases. |
+| `COMFY_IDLE_POLL` | `15` | How often the queue is checked, in seconds. Worst case release delay is this plus `COMFY_IDLE_UNLOAD`. |
 | `COMFY_ASYNC_OFFLOAD` | `on` | Overlaps weight transfers with compute. `on`, `off`, or a stream count such as `4`. |
 | `COMFY_CACHE` | `classic` | Node result cache: `classic`, `none` (least RAM, re-executes everything) or `lru:N`. |
 | `COMFY_RESERVE_VRAM` | unset | GB of VRAM ComfyUI leaves unused. |
@@ -113,10 +115,15 @@ longer look it up as root.
 
 ## Sharing the GPU
 
-If something else uses the same card, an LLM server for instance, leave
-`COMFY_SMART_MEMORY=off` so VRAM goes back after each run, and consider
-`COMFY_VRAM_HEADROOM`. ComfyUI has no idle timer, so to drop everything on
-demand:
+If something else uses the same card, an LLM server for instance, set
+`COMFY_IDLE_UNLOAD` to a few minutes. ComfyUI then finishes its work quickly
+with the model resident, and hands the card back once you stop queueing.
+
+Turning `COMFY_SMART_MEMORY` off is the wrong lever here: it makes every
+generation slower, which lengthens the window in which the other program cannot
+have the GPU, and moves the memory to RAM rather than releasing it.
+
+To release immediately, at any time:
 
 ```bash
 curl -s -X POST http://127.0.0.1:8188/free \
@@ -124,7 +131,25 @@ curl -s -X POST http://127.0.0.1:8188/free \
   -d '{"unload_models": true, "free_memory": true}'
 ```
 
-Run that from cron for automatic idle unloading.
+## Memory
+
+After a generation ComfyUI keeps the model loaded so the next run is instant,
+which is why an idle container can still hold many gigabytes. On a 12GB card
+with a large checkpoint that was measured at 19.4 GiB of resident memory, and
+the `/free` call above returned about 15 GiB of it in one go.
+
+Two things to know when reading a memory figure:
+
+- **Container tools count page cache.** A cgroup's usage includes the file
+  cache from reading model files off disk, which the kernel drops whenever
+  anything needs it. `docker exec <name> grep -E '^(anon|file) ' /sys/fs/cgroup/memory.stat`
+  separates what is really held (`anon`) from that cache (`file`).
+- **A few GB never goes away** while the container runs: Python, torch and the
+  Intel runtime cost about 4.4 GiB resident before any model is loaded.
+
+`COMFY_CACHE=none` is the companion setting: it stops ComfyUI keeping node
+results (latents, images) between runs, at the cost of re-executing every node
+each time.
 
 ## Custom nodes
 
