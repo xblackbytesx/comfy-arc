@@ -109,7 +109,7 @@ if [[ -n ${PUID:-}${PGID:-} ]]; then
 
     getent group "$pgid" >/dev/null 2>&1 || groupadd -g "$pgid" comfy
     getent passwd "$puid" >/dev/null 2>&1 \
-      || useradd -u "$puid" -g "$pgid" -M -d "$HOME" -s /sbin/nologin comfy
+      || useradd -r -u "$puid" -g "$pgid" -M -d "$HOME" -s /sbin/nologin comfy
 
     # /dev/dri is owned by the render group on the host. Without it as a
     # supplementary group the GPU is invisible to a non-root process.

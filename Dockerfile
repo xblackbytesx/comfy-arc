@@ -56,6 +56,18 @@ RUN python3 -m pip install --upgrade pip wheel setuptools packaging \
  && python3 -m pip install "torch==${TORCH_VERSION}" torchvision torchaudio \
       --index-url "${TORCH_INDEX_URL}"
 
+# The XPU wheels ship the Intel runtime (libsycl and friends) into
+# /usr/local/lib through the wheel data scheme, and Fedora does not search
+# there. Register that and torch's own lib directory with the dynamic loader,
+# which beats LD_LIBRARY_PATH: it survives dropping privileges and any
+# environment the operator passes in. The import is a smoke test, so a broken
+# library path fails the build instead of every container start.
+RUN { echo /usr/local/lib; \
+      python3 -c "import sysconfig, os; print(os.path.join(sysconfig.get_paths()['platlib'], 'torch', 'lib'))"; \
+    } > /etc/ld.so.conf.d/comfy-arc.conf \
+ && ldconfig \
+ && python3 -c "import torch; print('torch', torch.__version__, 'xpu:', torch.version.xpu)"
+
 # Constraints stop any later requirements file from moving PyTorch, the one
 # package that has to match the Intel runtime installed above.
 RUN python3 -m pip list --format=freeze | grep -E '^(torch|torchvision|torchaudio)==' \

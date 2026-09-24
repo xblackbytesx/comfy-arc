@@ -60,6 +60,11 @@ below exists to keep that true.
 
 ## Testing without Docker
 
+The build is its own first test: it imports torch after registering the
+loader paths, so a missing Intel runtime library (libsycl and friends, which
+the XPU wheels drop into `/usr/local/lib`) fails the build rather than every
+container start. Keep that check.
+
 `entrypoint.sh` is testable on its own: put a stub `python3` on `PATH` that
 echoes its arguments, set `COMFY_DATA_DIR` to a temp dir, and check the flags
 for each configuration plus the failure cases. `shellcheck entrypoint.sh` and
