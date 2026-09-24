@@ -45,6 +45,7 @@ RUN dnf install -y --nogpgcheck \
       python3.14-devel python3-pip python3-wheel python3-setuptools python3-cython \
       python3-cmake make ninja-build gcc gcc-c++ \
       git curl \
+      shadow-utils util-linux \
       intel-compute-runtime intel-level-zero oneapi-level-zero \
       intel-opencl intel-igc intel-ocloc clinfo \
       mesa-libGL mesa-libEGL ffmpeg \

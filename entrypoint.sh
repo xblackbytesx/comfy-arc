@@ -9,6 +9,7 @@
 set -euo pipefail
 
 die() { printf 'entrypoint: %s\n' "$*" >&2; exit 1; }
+note() { printf 'comfy-arc: %s\n' "$*"; }
 
 # Accept the usual spellings for a boolean and reject anything else, so a typo
 # in a compose file fails loudly instead of silently picking a default.
@@ -22,13 +23,20 @@ is_on() {
 
 DATA_DIR=${COMFY_DATA_DIR:-/data}
 TEMP_DIR=${COMFY_TEMP_DIR:-/tmp/comfyui}
+CACHE_DIR="$DATA_DIR/cache"
 
-mkdir -p \
-  "$DATA_DIR/models" "$DATA_DIR/input" "$DATA_DIR/output" "$DATA_DIR/user" \
-  "$DATA_DIR/cache/sycl" "$TEMP_DIR"
+DIRS=(
+  "$DATA_DIR" "$DATA_DIR/models" "$DATA_DIR/input" "$DATA_DIR/output"
+  "$DATA_DIR/user" "$CACHE_DIR" "$CACHE_DIR/sycl" "$CACHE_DIR/home"
+  "$CACHE_DIR/huggingface" "$CACHE_DIR/torch" "$TEMP_DIR"
+)
+mkdir -p "${DIRS[@]}"
 
-# Kernel cache, only useful when it outlives the container.
-export SYCL_CACHE_DIR=${SYCL_CACHE_DIR:-$DATA_DIR/cache/sycl}
+# Caches belong with the data, not in a container layer that is thrown away.
+export SYCL_CACHE_DIR=${SYCL_CACHE_DIR:-$CACHE_DIR/sycl}
+export HF_HOME=${HF_HOME:-$CACHE_DIR/huggingface}
+export TORCH_HOME=${TORCH_HOME:-$CACHE_DIR/torch}
+export HOME="$CACHE_DIR/home"
 
 args=(
   --listen "${COMFY_HOST:-0.0.0.0}"
@@ -86,5 +94,44 @@ if [[ -n ${COMFY_EXTRA_ARGS:-} ]]; then
   args+=("${extra[@]}")
 fi
 
+# Run as a normal account, so generated images on the host belong to whoever
+# owns the dataset rather than to root. Set PUID/PGID to that account. Starting
+# the container with docker's own `user:` works too and is respected as is.
+run_as=()
+if [[ -n ${PUID:-}${PGID:-} ]]; then
+  if [[ $(id -u) -ne 0 ]]; then
+    note "PUID/PGID ignored, already running as $(id -u):$(id -g)"
+  else
+    puid=${PUID:-1000}
+    pgid=${PGID:-$puid}
+    [[ $puid =~ ^[0-9]+$ ]] || die "PUID must be numeric (got '$puid')"
+    [[ $pgid =~ ^[0-9]+$ ]] || die "PGID must be numeric (got '$pgid')"
+
+    getent group "$pgid" >/dev/null 2>&1 || groupadd -g "$pgid" comfy
+    getent passwd "$puid" >/dev/null 2>&1 \
+      || useradd -u "$puid" -g "$pgid" -M -d "$HOME" -s /sbin/nologin comfy
+
+    # /dev/dri is owned by the render group on the host. Without it as a
+    # supplementary group the GPU is invisible to a non-root process.
+    groups=$pgid
+    for dev in /dev/dri/render*; do
+      [[ -e $dev ]] || continue
+      render_gid=$(stat -c '%g' "$dev")
+      if [[ $render_gid != "$pgid" ]]; then
+        groups="$groups,$render_gid"
+      fi
+      break
+    done
+
+    # Only the directories this script creates, never recursively: a models
+    # tree can be terabytes, and its files are the operator's to own. Fix any
+    # leftovers once on the host with chown -R.
+    chown "$puid:$pgid" "${DIRS[@]}"
+
+    note "running as ${puid}:${pgid} (groups ${groups})"
+    run_as=(setpriv --reuid "$puid" --regid "$pgid" --groups "$groups" --inh-caps=-all --)
+  fi
+fi
+
 printf 'comfy-arc: python3 main.py %s %s\n' "${args[*]}" "$*"
-exec python3 main.py "${args[@]}" "$@"
+exec ${run_as[@]+"${run_as[@]}"} python3 main.py "${args[@]}" "$@"

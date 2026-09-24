@@ -16,6 +16,9 @@ services:
       - /dev/dri:/dev/dri
     environment:
       # See README.md. Defaults live in entrypoint.sh; these make them visible.
+      # Own generated files as this account instead of root (unset = root).
+      PUID: ${PUID:-}
+      PGID: ${PGID:-}
       COMFY_SMART_MEMORY: ${COMFY_SMART_MEMORY:-off}
       COMFY_ASYNC_OFFLOAD: ${COMFY_ASYNC_OFFLOAD:-on}
       COMFY_CACHE: ${COMFY_CACHE:-classic}

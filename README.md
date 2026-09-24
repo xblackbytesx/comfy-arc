@@ -68,7 +68,8 @@ appended to ComfyUI's command line and wins over them.
 | `COMFY_PREVIEW_METHOD` | unset | Passed to `--preview-method`, for example `none`. |
 | `COMFY_EXTRA_ARGS` | unset | Extra flags, verbatim. |
 | `COMFY_HOST`, `COMFY_PORT` | `0.0.0.0`, `8188` | Listen address and port. |
-| `COMFY_DATA_DIR` | `/data` | Where models, input, output, user and the kernel cache live. |
+| `COMFY_DATA_DIR` | `/data` | Where models, input, output, user and the caches live. |
+| `PUID`, `PGID` | unset | Run as this account instead of root, so generated files belong to it. |
 
 Invalid values fail at startup with a message naming the variable, rather than
 falling back to a default you did not ask for.
@@ -84,7 +85,31 @@ what a running instance is actually doing.
 /data/output        images out
 /data/user          settings, and default/workflows
 /data/cache/sycl    compiled GPU kernels, see Performance
+/data/cache/huggingface, /data/cache/torch, /data/cache/home
+                    model and library caches, kept out of the container layer
 ```
+
+## Permissions
+
+By default the container runs as root, so anything it writes to `output` is
+owned by root on the host. Set `PUID` and `PGID` to the account that owns your
+data directory and it will instead:
+
+- create that user and group inside the container,
+- add the group that owns `/dev/dri/render*`, so the GPU stays visible,
+- chown the directories it creates, then drop to that account for good.
+
+The chown is never recursive: a models tree can be terabytes and its files are
+yours to own. Files written during earlier root runs keep their ownership, so
+fix those once on the host:
+
+```bash
+sudo chown -R 950:950 /path/to/comfyui-data
+```
+
+Docker's own `user:` (or `--user`) works too and is respected as is; in that
+case add the render group yourself with `group_add`, since the container can no
+longer look it up as root.
 
 ## Sharing the GPU
 
