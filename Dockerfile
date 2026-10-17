@@ -42,7 +42,10 @@ ENV PYTHONUNBUFFERED=1
 
 # System packages. intel-compute-runtime and Level Zero are what torch.xpu
 # talks to; the host supplies only the kernel driver and /dev/dri. ffmpeg comes
-# from rpmfusion. The toolchain is for wheels that build from source.
+# from rpmfusion. The toolchain is for wheels that build from source, and for
+# Triton (COMFY_TRITON), which compiles its XPU launcher with g++ on first use
+# against the Level Zero headers and libze_loader.so from the -devel package;
+# the SYCL half of that comes from the intel-sycl-rt wheel torch pulls in.
 RUN dnf install -y --nogpgcheck \
       "https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-44.noarch.rpm" \
  && dnf install -y \
@@ -50,7 +53,7 @@ RUN dnf install -y --nogpgcheck \
       python3-cmake make ninja-build gcc gcc-c++ \
       git curl \
       shadow-utils util-linux \
-      intel-compute-runtime intel-level-zero oneapi-level-zero \
+      intel-compute-runtime intel-level-zero oneapi-level-zero oneapi-level-zero-devel \
       intel-opencl intel-igc intel-ocloc clinfo \
       mesa-libGL mesa-libEGL ffmpeg \
  && dnf clean all \
@@ -101,6 +104,13 @@ RUN set -eu; \
       fi; \
     done; \
     rm -f /tmp/nodes.list
+
+# Upstream only lets NVIDIA run int8 and w4a8 checkpoints on int8 kernels; on
+# Arc they are dequantized on every call, which makes an LLM prompt upsampler
+# take minutes. The script explains both edits and fails the build if either
+# no longer matches, so an upgrade cannot drop the fix silently.
+COPY patches/xpu_int8.py /tmp/xpu_int8.py
+RUN python3 /tmp/xpu_int8.py /opt/comfyui && rm /tmp/xpu_int8.py
 
 # A manifest of what ended up inside, readable without starting the app:
 #   docker run --rm --entrypoint cat <image> /opt/comfy-arc-packages.txt

@@ -1,0 +1,873 @@
+{
+  "id": "00000000-0000-4000-8000-000000000020",
+  "revision": 0,
+  "last_node_id": 14,
+  "last_link_id": 19,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        0,
+        40
+      ],
+      "size": [
+        340,
+        420
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1,
+            18
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ]
+    },
+    {
+      "id": 2,
+      "type": "JoinImageWithAlpha",
+      "pos": [
+        380,
+        40
+      ],
+      "size": [
+        220,
+        50
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "localized_name": "alpha",
+          "name": "alpha",
+          "type": "MASK",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "JoinImageWithAlpha",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 3,
+      "type": "ResizeImageMaskNode",
+      "pos": [
+        380,
+        140
+      ],
+      "size": [
+        320,
+        130
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "input",
+          "name": "input",
+          "type": "IMAGE,MASK",
+          "link": 3
+        },
+        {
+          "localized_name": "resize_type.multiplier",
+          "name": "resize_type.multiplier",
+          "type": "FLOAT",
+          "widget": {
+            "name": "resize_type.multiplier"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "resized",
+          "name": "resized",
+          "type": "IMAGE",
+          "links": [
+            4,
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ResizeImageMaskNode",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "scale by multiplier",
+        2,
+        "lanczos"
+      ],
+      "title": "Scale (2x is the sweet spot on 12 GB)"
+    },
+    {
+      "id": 4,
+      "type": "SeedVR2Preprocess",
+      "pos": [
+        380,
+        320
+      ],
+      "size": [
+        240,
+        50
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "resized_images",
+          "name": "resized_images",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeedVR2Preprocess",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 5,
+      "type": "VAELoader",
+      "pos": [
+        740,
+        40
+      ],
+      "size": [
+        360,
+        60
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "vae_name",
+          "name": "vae_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "vae_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            6,
+            14
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "models": [
+          {
+            "name": "seedvr2_ema_vae_fp16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/main/vae/seedvr2_ema_vae_fp16.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "seedvr2_ema_vae_fp16.safetensors"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "UNETLoader",
+      "pos": [
+        740,
+        140
+      ],
+      "size": [
+        360,
+        90
+      ],
+      "flags": {},
+      "mode": 0,
+      "showAdvanced": false,
+      "inputs": [
+        {
+          "localized_name": "unet_name",
+          "name": "unet_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "unet_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "MODEL",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            7,
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "UNETLoader",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "models": [
+          {
+            "name": "seedvr2_7b_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/main/diffusion_models/seedvr2_7b_int8_convrot.safetensors",
+            "directory": "diffusion_models"
+          }
+        ]
+      },
+      "widgets_values": [
+        "seedvr2_7b_int8_convrot.safetensors",
+        "default"
+      ]
+    },
+    {
+      "id": 7,
+      "type": "VAEEncodeTiled",
+      "pos": [
+        740,
+        280
+      ],
+      "size": [
+        300,
+        160
+      ],
+      "flags": {},
+      "mode": 0,
+      "showAdvanced": true,
+      "inputs": [
+        {
+          "localized_name": "pixels",
+          "name": "pixels",
+          "type": "IMAGE",
+          "link": 5
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 6
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "LATENT",
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            8,
+            12
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEEncodeTiled",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        512,
+        128,
+        4096,
+        8
+      ]
+    },
+    {
+      "id": 8,
+      "type": "SeedVR2Conditioning",
+      "pos": [
+        1140,
+        40
+      ],
+      "size": [
+        260,
+        70
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 7
+        },
+        {
+          "label": "latent",
+          "localized_name": "vae_conditioning",
+          "name": "vae_conditioning",
+          "type": "LATENT",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "positive",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            10
+          ]
+        },
+        {
+          "localized_name": "negative",
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeedVR2Conditioning",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 9,
+      "type": "KSampler",
+      "pos": [
+        1140,
+        150
+      ],
+      "size": [
+        300,
+        300
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 9
+        },
+        {
+          "localized_name": "positive",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 10
+        },
+        {
+          "localized_name": "negative",
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 11
+        },
+        {
+          "localized_name": "latent_image",
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 12
+        },
+        {
+          "localized_name": "seed",
+          "name": "seed",
+          "type": "INT",
+          "widget": {
+            "name": "seed"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sampler_name",
+          "name": "sampler_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "scheduler",
+          "name": "scheduler",
+          "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "denoise",
+          "name": "denoise",
+          "type": "FLOAT",
+          "widget": {
+            "name": "denoise"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "LATENT",
+          "name": "LATENT",
+          "type": "LATENT",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "KSampler",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        959948902156062,
+        "fixed",
+        1,
+        1,
+        "euler",
+        "simple",
+        1
+      ],
+      "title": "KSampler (one step, keep as is)"
+    },
+    {
+      "id": 10,
+      "type": "VAEDecodeTiled",
+      "pos": [
+        1480,
+        40
+      ],
+      "size": [
+        300,
+        160
+      ],
+      "flags": {},
+      "mode": 0,
+      "showAdvanced": true,
+      "inputs": [
+        {
+          "localized_name": "samples",
+          "name": "samples",
+          "type": "LATENT",
+          "link": 13
+        },
+        {
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
+          "link": 14
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "IMAGE",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAEDecodeTiled",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        512,
+        128,
+        4096,
+        8
+      ]
+    },
+    {
+      "id": 11,
+      "type": "SeedVR2PostProcessing",
+      "pos": [
+        1480,
+        240
+      ],
+      "size": [
+        320,
+        110
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 15
+        },
+        {
+          "localized_name": "original_resized_images",
+          "name": "original_resized_images",
+          "type": "IMAGE",
+          "link": 16
+        },
+        {
+          "localized_name": "color_correction_method",
+          "name": "color_correction_method",
+          "type": "COMBO",
+          "widget": {
+            "name": "color_correction_method"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            17,
+            19
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeedVR2PostProcessing",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "lab"
+      ],
+      "title": "Colour match to the source"
+    },
+    {
+      "id": 12,
+      "type": "SaveImage",
+      "pos": [
+        1840,
+        40
+      ],
+      "size": [
+        380,
+        380
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 17
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "seedvr2_upscale"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "ImageCompare",
+      "pos": [
+        1480,
+        400
+      ],
+      "size": [
+        700,
+        420
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image_a",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 18
+        },
+        {
+          "name": "image_b",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 19
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "ImageCompare",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 14,
+      "type": "MarkdownNote",
+      "pos": [
+        0,
+        500
+      ],
+      "size": [
+        700,
+        340
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "## SeedVR2 7B upscale\n\nLoad any image (a Klein output, a photo) and it comes back 2x larger, restored in one diffusion step. Colour is matched to the source in LAB space.\n\n### Files (under `/data/models/`)\n\n| Folder | File | Size |\n|---|---|---|\n| diffusion_models | seedvr2_7b_int8_convrot.safetensors | 8.3 GB |\n| vae | seedvr2_ema_vae_fp16.safetensors | 0.5 GB |\n\nFrom [Comfy-Org/SeedVR2](https://huggingface.co/Comfy-Org/SeedVR2).\n\n### Knobs\n- Scale: 2x of a 1 to 4 MP image is comfortable on 12 GB; 4x of a 1 MP image works but is slow.\n- Faster or less RAM: `seedvr2_3b_int8_convrot.safetensors` (3.5 GB).\n- Crisper: the `seedvr2_7b_sharp_` variant, which can over-sharpen AI images.\n"
+      ],
+      "color": "#222",
+      "bgcolor": "#000"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      1,
+      1,
+      2,
+      1,
+      "MASK"
+    ],
+    [
+      3,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      4,
+      3,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      4,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ],
+    [
+      6,
+      5,
+      0,
+      7,
+      1,
+      "VAE"
+    ],
+    [
+      7,
+      6,
+      0,
+      8,
+      0,
+      "MODEL"
+    ],
+    [
+      8,
+      7,
+      0,
+      8,
+      1,
+      "LATENT"
+    ],
+    [
+      9,
+      6,
+      0,
+      9,
+      0,
+      "MODEL"
+    ],
+    [
+      10,
+      8,
+      0,
+      9,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      11,
+      8,
+      1,
+      9,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      12,
+      7,
+      0,
+      9,
+      3,
+      "LATENT"
+    ],
+    [
+      13,
+      9,
+      0,
+      10,
+      0,
+      "LATENT"
+    ],
+    [
+      14,
+      5,
+      0,
+      10,
+      1,
+      "VAE"
+    ],
+    [
+      15,
+      10,
+      0,
+      11,
+      0,
+      "IMAGE"
+    ],
+    [
+      16,
+      3,
+      0,
+      11,
+      1,
+      "IMAGE"
+    ],
+    [
+      17,
+      11,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      18,
+      1,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      19,
+      11,
+      0,
+      13,
+      1,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "SeedVR2 7B: upscale any image",
+      "bounding": [
+        -40,
+        -40,
+        2300,
+        900
+      ],
+      "color": "#3f5159",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6,
+      "offset": [
+        100,
+        100
+      ]
+    }
+  },
+  "version": 0.4
+}

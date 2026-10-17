@@ -49,8 +49,10 @@ below exists to keep that true.
 |---|---|
 | `Dockerfile` | the image: Intel runtime, PyTorch XPU, ComfyUI, nodes, manifest |
 | `nodes.list` | `<name> <git url> <commit>`, one node per line |
+| `patches/xpu_int8.py` | build-time edits so int8/w4a8 run on int8 kernels on XPU |
 | `entrypoint.sh` | environment variables to ComfyUI flags, then exec |
 | `docker-compose.yml` | reference deployment, pulls GHCR or builds locally |
+| `workflows/` | ready-made workflows (core nodes only) and the models they need |
 | `.github/workflows/ci.yml` | hadolint, shellcheck, compose config, pin check |
 | `.github/workflows/release.yml` | tag or manual run to GHCR |
 
@@ -62,6 +64,9 @@ below exists to keep that true.
 - **New tunable:** add it to `entrypoint.sh` with a default and validation, to
   the table in `README.md`, and to `.env.example`. Compose passes it through.
 - **Never** add a step that fetches anything at container start.
+- **`patches/xpu_int8.py` fails the build** when an upgrade moves its anchors.
+  Check whether upstream now handles XPU itself and drop that edit, rather than
+  loosening the match.
 
 ## Testing without Docker
 

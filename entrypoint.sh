@@ -88,6 +88,12 @@ esac
 # API nodes reach out to remote services; off keeps the frontend local.
 is_on COMFY_API_NODES "${COMFY_API_NODES:-on}" || args+=(--disable-api-nodes)
 
+# comfy-kitchen's Triton kernels for quantized checkpoints (int8, w4a8). Without
+# them Arc runs the portable fallback, which rebuilds each layer's weights on
+# every call: an int8 or w4a8 text generator then takes minutes per prompt.
+# Upstream ships it off; on Arc it is what makes those checkpoints usable.
+is_on COMFY_TRITON "${COMFY_TRITON:-on}" && args+=(--enable-triton-backend)
+
 [[ -n ${COMFY_PREVIEW_METHOD:-} ]] && args+=(--preview-method "$COMFY_PREVIEW_METHOD")
 
 # Anything else, verbatim, for flags this wrapper does not model.

@@ -67,6 +67,7 @@ appended to ComfyUI's command line and wins over them.
 | `COMFY_RESERVE_VRAM` | unset | GB of VRAM ComfyUI leaves unused. |
 | `COMFY_VRAM_HEADROOM` | unset | GB kept free, counting other processes' usage too. |
 | `COMFY_API_NODES` | `on` | `off` stops the frontend contacting remote API services. |
+| `COMFY_TRITON` | `on` | comfy-kitchen's Triton kernels for int8 and w4a8 checkpoints (see [Quantized checkpoints](#quantized-checkpoints)). `off` falls back to a much slower path. |
 | `COMFY_PREVIEW_METHOD` | unset | Passed to `--preview-method`, for example `none`. |
 | `COMFY_EXTRA_ARGS` | unset | Extra flags, verbatim, for example `--bf16-text-enc` (see [When a model does not fit](#when-a-model-does-not-fit)). |
 | `COMFY_HOST`, `COMFY_PORT` | `0.0.0.0`, `8188` | Listen address and port. |
@@ -196,6 +197,12 @@ or AMX. `--fp32-text-enc` always works and doubles the RAM. The flag is global,
 so it reaches encoders that stay on the GPU too; these models are trained in
 bf16, so that is not a downgrade.
 
+## Workflows
+
+[`workflows/`](workflows) holds ready-made workflows for a 12 GB card: FLUX 3
+Image Klein to 4K through PiD, and a SeedVR2 upscaler. They use core nodes
+only; the folder README lists the models and how to download them.
+
 ## Custom nodes
 
 [`nodes.list`](nodes.list) is the whole node set, one per line, each pinned to
@@ -212,6 +219,17 @@ make two builds of the same commit differ.
 
 A node whose requirements clash with the pinned PyTorch fails the build, which
 is the point: it fails for you at build time rather than at 3am on a Tuesday.
+
+## Quantized checkpoints
+
+Upstream only runs int8 and w4a8 checkpoints (FLUX 3 Klein and its prompt
+upsampler, for instance) on int8 kernels on NVIDIA. On Arc they are turned back
+into bf16 on every call, which an image model mostly absorbs but an LLM does
+not: the upsampler took 2.5 s per token. The build applies
+[`patches/xpu_int8.py`](patches/xpu_int8.py) to ComfyUI and comfy-kitchen, and
+`COMFY_TRITON` supplies the kernels; together that is 0.15 s per token on a
+B580. Triton compiles its kernels on first use and caches them under
+`/data/cache/home`, so the first run after an upgrade is slower.
 
 ## Performance
 

@@ -27,6 +27,7 @@ services:
       COMFY_RESERVE_VRAM: ${COMFY_RESERVE_VRAM:-}
       COMFY_VRAM_HEADROOM: ${COMFY_VRAM_HEADROOM:-}
       COMFY_API_NODES: ${COMFY_API_NODES:-on}
+      COMFY_TRITON: ${COMFY_TRITON:-on}
       COMFY_EXTRA_ARGS: ${COMFY_EXTRA_ARGS:-}
     volumes:
       - ${COMFY_ARC_DATA:-./data}:/data
