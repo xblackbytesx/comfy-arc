@@ -68,7 +68,7 @@ appended to ComfyUI's command line and wins over them.
 | `COMFY_VRAM_HEADROOM` | unset | GB kept free, counting other processes' usage too. |
 | `COMFY_API_NODES` | `on` | `off` stops the frontend contacting remote API services. |
 | `COMFY_PREVIEW_METHOD` | unset | Passed to `--preview-method`, for example `none`. |
-| `COMFY_EXTRA_ARGS` | unset | Extra flags, verbatim. |
+| `COMFY_EXTRA_ARGS` | unset | Extra flags, verbatim, for example `--bf16-text-enc` (see [When a model does not fit](#when-a-model-does-not-fit)). |
 | `COMFY_HOST`, `COMFY_PORT` | `0.0.0.0`, `8188` | Listen address and port. |
 | `COMFY_DATA_DIR` | `/data` | Where models, input, output, user and the caches live. |
 | `PUID`, `PGID` | unset | Run as this account instead of root, so generated files belong to it. |
@@ -151,6 +151,51 @@ Two things to know when reading a memory figure:
 results (latents, images) between runs, at the cost of re-executing every node
 each time.
 
+## When a model does not fit
+
+The loader line in the log is the one to read:
+
+```
+loaded completely; 5900.00 MB loaded, full load: True
+loaded partially; 10873.17 MB usable, 10788.80 MB loaded, 950.74 MB offloaded
+```
+
+`partially` means the checkpoint is larger than the VRAM ComfyUI was given, so
+every sampling step drags the offloaded slice back across PCIe. An
+`UR_RESULT_ERROR_OUT_OF_RESOURCES` moments later is the normal end of that
+story rather than a separate fault: whatever the weights left over is not
+enough for the activations.
+
+In the order worth trying:
+
+1. **Cast the weights.** `UNETLoader`'s `weight_dtype` widget set to
+   `fp8_e4m3fn` halves a bf16 checkpoint for a small quality cost and needs no
+   new download. An 11.7GB model becomes about 5.9GB and loads completely.
+2. **Use a smaller build** of the model, where one is published.
+3. **`COMFY_RESERVE_VRAM` or `COMFY_VRAM_HEADROOM`**, but only when something
+   else shares the card and ComfyUI is claiming memory it should leave alone.
+   Neither makes a model fit; both reduce what is available to it.
+
+### The CPU text encoder trap
+
+`CLIPLoader` has a `device` widget, and `cpu` does what it says: that text
+encoder moves off the GPU while the diffusion model and VAE stay on it. It is a
+poor first move all the same, because ComfyUI stores a CPU text encoder in fp16
+whatever the device, and fp16 has no fast path on x86. A 4B encoder then takes
+minutes with no error and no progress, and the interface sits at `KSampler: 0%`
+looking hung.
+
+If you do want an encoder on the CPU:
+
+```
+COMFY_EXTRA_ARGS=--bf16-text-enc
+```
+
+bf16 costs the same memory as fp16 and runs natively on any CPU with AVX512-BF16
+or AMX. `--fp32-text-enc` always works and doubles the RAM. The flag is global,
+so it reaches encoders that stay on the GPU too; these models are trained in
+bf16, so that is not a downgrade.
+
 ## Custom nodes
 
 [`nodes.list`](nodes.list) is the whole node set, one per line, each pinned to
@@ -184,7 +229,8 @@ is the point: it fails for you at build time rather than at 3am on a Tuesday.
 ## Versions
 
 Pins live in the [`Dockerfile`](Dockerfile) (`COMFYUI_VERSION`,
-`TORCH_VERSION`) and in `nodes.list`. To see exactly what an image contains,
+`TORCH_VERSION`, `TORCHVISION_VERSION`, `TORCHAUDIO_VERSION`) and in
+`nodes.list`. To see exactly what an image contains,
 without starting it:
 
 ```bash

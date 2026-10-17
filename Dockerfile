@@ -19,8 +19,12 @@ FROM fedora:44
 # the next one empty input.
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-ARG COMFYUI_VERSION=v0.37.0
-ARG TORCH_VERSION=2.14.0
+ARG COMFYUI_VERSION=v0.41.3
+ARG TORCH_VERSION=2.14.1
+# torchaudio XPU builds stopped at 2.11 (upstream is in maintenance), and
+# ComfyUI core no longer needs it; it stays for custom nodes that do.
+ARG TORCHVISION_VERSION=0.29.1
+ARG TORCHAUDIO_VERSION=2.11.0
 ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/xpu
 
 LABEL org.opencontainers.image.title="comfy-arc" \
@@ -53,7 +57,8 @@ RUN dnf install -y --nogpgcheck \
  && rm -rf /var/cache/dnf
 
 RUN python3 -m pip install --upgrade pip wheel setuptools packaging \
- && python3 -m pip install "torch==${TORCH_VERSION}" torchvision torchaudio \
+ && python3 -m pip install "torch==${TORCH_VERSION}" \
+      "torchvision==${TORCHVISION_VERSION}" "torchaudio==${TORCHAUDIO_VERSION}" \
       --index-url "${TORCH_INDEX_URL}"
 
 # The XPU wheels ship the Intel runtime (libsycl and friends) into

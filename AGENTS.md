@@ -12,8 +12,9 @@ below exists to keep that true.
    `pip install` in the entrypoint. ComfyUI-Manager is deliberately not in the
    image, and must not be added: it installs packages on startup, which is how
    these setups drift into "booted yesterday, not today".
-2. **Every version is pinned in the repo.** `COMFYUI_VERSION` and
-   `TORCH_VERSION` in `Dockerfile`, one commit per node in `nodes.list`. A
+2. **Every version is pinned in the repo.** `COMFYUI_VERSION`,
+   `TORCH_VERSION`, `TORCHVISION_VERSION` and `TORCHAUDIO_VERSION` in
+   `Dockerfile`, one commit per node in `nodes.list`. A
    branch name is never acceptable; CI fails on anything that is not a full
    40 character sha.
 3. **PyTorch is immovable.** `/etc/comfy-arc-constraints.txt` is generated

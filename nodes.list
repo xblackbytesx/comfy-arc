@@ -12,10 +12,10 @@
 # Examples, both of which the old yanwk image bundled:
 #
 #   workflow ergonomics: reroutes, group muting, seed and context nodes
-# rgthree-comfy       https://github.com/rgthree/rgthree-comfy.git      2c5342a8cb0eaecaabf61435a5f37dd594c510ba
+# rgthree-comfy       https://github.com/rgthree/rgthree-comfy.git      5f940ddfbb83ff9c667f32ae7d0c3ad0bb8cc9ee
 #
 #   large all-in-one pack: pipes, presets, loaders
-# ComfyUI-Easy-Use    https://github.com/yolain/ComfyUI-Easy-Use.git    8730ffd14044ee9392db3b192646266576bc67df
+# ComfyUI-Easy-Use    https://github.com/yolain/ComfyUI-Easy-Use.git    4ba22aa1ec2dd606995574d93d70c6c8a3744859
 #
 #   GGUF quantised checkpoints, useful when VRAM is tight
-# ComfyUI-GGUF        https://github.com/city96/ComfyUI-GGUF.git        <commit>
+# ComfyUI-GGUF        https://github.com/city96/ComfyUI-GGUF.git        6ea2651e7df66d7585f6ffee804b20e92fb38b8a
