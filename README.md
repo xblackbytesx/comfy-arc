@@ -10,6 +10,7 @@ of this repo is the same thing every time it starts.
 
 [![CI](https://github.com/xblackbytesx/comfy-arc/actions/workflows/ci.yml/badge.svg)](https://github.com/xblackbytesx/comfy-arc/actions/workflows/ci.yml)
 [![Release](https://github.com/xblackbytesx/comfy-arc/actions/workflows/release.yml/badge.svg)](https://github.com/xblackbytesx/comfy-arc/actions/workflows/release.yml)
+[![Latest release](https://img.shields.io/github/v/release/xblackbytesx/comfy-arc?sort=semver)](https://github.com/xblackbytesx/comfy-arc/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 
 ## Why
@@ -200,7 +201,8 @@ bf16, so that is not a downgrade.
 ## Workflows
 
 [`workflows/`](workflows) holds ready-made workflows for a 12 GB card: FLUX 3
-Image Klein to 4K through PiD, and a SeedVR2 upscaler. They use core nodes
+Image Klein upscaled to about 2048 px by SeedVR2, and a standalone SeedVR2
+upscaler. They use core nodes
 only; the folder README lists the models and how to download them.
 
 ## Custom nodes
@@ -209,16 +211,17 @@ only; the folder README lists the models and how to download them.
 a commit:
 
 ```
-rgthree-comfy    https://github.com/rgthree/rgthree-comfy.git    2c5342a8cb0eaecaabf61435a5f37dd594c510ba
+rgthree-comfy    https://github.com/rgthree/rgthree-comfy.git    bc48c6aaeca87bedbc14245d89f9bc6be37a630e
 ```
 
-Add a line, rebuild, and the image carries exactly that set. To find a repo's
+Add a line, run `scripts/lock.sh` (it adds the node's requirements to
+`requirements.lock`), rebuild, and the image carries exactly that set. To find a repo's
 current tip: `git ls-remote https://github.com/<owner>/<repo> HEAD`. CI rejects
 anything that is not a full 40 character commit, because a branch name would
 make two builds of the same commit differ.
 
-A node whose requirements clash with the pinned PyTorch fails the build, which
-is the point: it fails for you at build time rather than at 3am on a Tuesday.
+A node whose requirements clash with the pinned PyTorch fails to lock, and one
+that needs a package the lock does not hold fails the build. That is the point: it fails for you at build time rather than at 3am on a Tuesday.
 
 ## Quantized checkpoints
 
@@ -246,14 +249,29 @@ B580. Triton compiles its kernels on first use and caches them under
 
 ## Versions
 
-Pins live in the [`Dockerfile`](Dockerfile) (`COMFYUI_VERSION`,
-`TORCH_VERSION`, `TORCHVISION_VERSION`, `TORCHAUDIO_VERSION`) and in
-`nodes.list`. To see exactly what an image contains,
-without starting it:
+| Pin | Where |
+|---|---|
+| Fedora base image | `FROM` digest in the [`Dockerfile`](Dockerfile) |
+| ComfyUI, PyTorch, torchvision, torchaudio | `ARG`s in the `Dockerfile` |
+| Custom nodes | a commit per line in [`nodes.list`](nodes.list) |
+| Every Python package | [`requirements.lock`](requirements.lock), exact versions with sha256 hashes |
+
+The lock is generated, never edited: after changing an `ARG` or `nodes.list`,
+run [`scripts/lock.sh`](scripts/lock.sh) (needs [uv](https://docs.astral.sh/uv/)).
+It resolves ComfyUI's and every node's requirements against the PyTorch XPU
+builds, wheels only. CI fails when the lock no longer matches the pins, and the
+build fails when ComfyUI or a node needs a package the lock does not hold.
+
+The one thing not pinned is Fedora's own packages (the Intel compute runtime,
+ffmpeg): Fedora's update repos keep only the newest build, so a pinned rpm
+would stop building. Each image records what it got. To see exactly what an
+image contains, without starting it:
 
 ```bash
 docker run --rm --entrypoint cat \
   ghcr.io/xblackbytesx/comfy-arc:latest /opt/comfy-arc-packages.txt
+docker run --rm --entrypoint cat \
+  ghcr.io/xblackbytesx/comfy-arc:latest /opt/comfy-arc-rpms.txt
 ```
 
 Tagged releases publish `vX.Y.Z`, `X.Y`, `X` and `latest`.

@@ -5,7 +5,7 @@ RAM). They use core nodes only, so they need nothing beyond this image.
 
 | File | What it does |
 |---|---|
-| `flux3-klein-t2i-4k.json` | FLUX 3 Image Klein text to image at about 1 MP, decoded by PiD straight into a 4x image (4096 px square) |
+| `flux3-klein-t2i-2k.json` | FLUX 3 Image Klein text to image at about 1 MP, saved, then restored and doubled by SeedVR2 7B (about 2048 px) |
 | `seedvr2-upscale.json` | SeedVR2 7B restoration upscale of any image, 2x by default |
 
 ## Loading
@@ -32,10 +32,8 @@ is deliberately not used.
 | text_encoders | qwen3vl_4b_int8_convrot.safetensors | 4.9 GB | Klein |
 | text_encoders | qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors | 6.7 GB | Klein |
 | vae | flux2-vae.safetensors | 0.3 GB | Klein |
-| diffusion_models | pid_1.5_flux2_1024_to_4096_4step_bf16.safetensors | 2.8 GB | Klein |
-| text_encoders | gemma_2_2b_it_elm_fp8_scaled.safetensors | 2.6 GB | Klein |
-| diffusion_models | seedvr2_7b_int8_convrot.safetensors | 8.3 GB | SeedVR2 |
-| vae | seedvr2_ema_vae_fp16.safetensors | 0.5 GB | SeedVR2 |
+| diffusion_models | seedvr2_7b_int8_convrot.safetensors | 8.3 GB | both |
+| vae | seedvr2_ema_vae_fp16.safetensors | 0.5 GB | both |
 
 The int8 files need a working `torch._int_mm` on XPU. To check an image:
 
@@ -64,11 +62,6 @@ $x hf download black-forest-labs/flux-3-image-klein-comfy \
   vae/flux2-vae.safetensors \
   --local-dir /data/models
 
-$x hf download Comfy-Org/PixelDiT \
-  diffusion_models/pid_1.5_flux2_1024_to_4096_4step_bf16.safetensors \
-  text_encoders/gemma_2_2b_it_elm_fp8_scaled.safetensors \
-  --local-dir /data/models
-
 $x hf download Comfy-Org/SeedVR2 \
   diffusion_models/seedvr2_7b_int8_convrot.safetensors \
   vae/seedvr2_ema_vae_fp16.safetensors \
@@ -78,9 +71,13 @@ $x hf download Comfy-Org/SeedVR2 \
 ## Memory
 
 ComfyUI swaps the models through VRAM one at a time, and with smart memory on
-it keeps the ones it is not using in RAM. The Klein workflow holds about 23 GB
+it keeps the ones it is not using in RAM. The Klein workflow holds about 27 GB
 of weights in total, plus about 4.4 GB of baseline; `COMFY_IDLE_UNLOAD`
 returns it once you stop queueing.
+
+Why not straight to 4K: PiD (latent to a 4x image) needs more than 12 GB for
+its 16 MP pass on its own, whatever else is unloaded, so it cannot run on this
+card. SeedVR2 at 2x of 1 MP fits.
 
 A container memory limit below that is fine: ComfyUI reads the cgroup limit
 and evicts models to stay inside it, at the cost of reloading them from disk

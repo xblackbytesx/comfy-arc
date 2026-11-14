@@ -3,3 +3,4 @@
 !entrypoint.sh
 !idle-unload.sh
 !patches/xpu_int8.py
+!requirements.lock

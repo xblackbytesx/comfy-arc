@@ -1,8 +1,8 @@
 {
   "id": "00000000-0000-4000-8000-000000000023",
   "revision": 0,
-  "last_node_id": 31,
-  "last_link_id": 37,
+  "last_node_id": 27,
+  "last_link_id": 33,
   "nodes": [
     {
       "id": 1,
@@ -314,8 +314,7 @@
           "name": "STRING",
           "type": "STRING",
           "links": [
-            7,
-            23
+            7
           ]
         }
       ],
@@ -344,16 +343,14 @@
           "name": "width",
           "type": "INT",
           "links": [
-            10,
-            19
+            10
           ]
         },
         {
           "name": "height",
           "type": "INT",
           "links": [
-            11,
-            20
+            11
           ]
         }
       ],
@@ -365,7 +362,7 @@
         1.0,
         16
       ],
-      "title": "Base resolution (keep near 1 MP for PiD)"
+      "title": "Base resolution (1 MP; SeedVR2 doubles it)"
     },
     {
       "id": 8,
@@ -754,8 +751,7 @@
           "type": "LATENT",
           "slot_index": 0,
           "links": [
-            16,
-            27
+            16
           ]
         }
       ],
@@ -807,25 +803,26 @@
           "type": "IMAGE",
           "slot_index": 0,
           "links": [
-            18
+            18,
+            19
           ]
         }
       ],
       "properties": {
         "Node name for S&R": "VAEDecode"
       },
-      "title": "Decode base for preview"
+      "title": "Decode base"
     },
     {
       "id": 16,
-      "type": "PreviewImage",
+      "type": "SaveImage",
       "pos": [
         2320,
         520
       ],
       "size": [
-        220,
-        260
+        240,
+        300
       ],
       "flags": {},
       "mode": 0,
@@ -836,149 +833,177 @@
           "link": 18
         }
       ],
-      "outputs": [],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
       "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "PreviewImage"
+        "Node name for S&R": "SaveImage"
       },
-      "widgets_values": [],
-      "title": "Base image (1 MP)"
+      "widgets_values": [
+        "flux3_klein_base"
+      ],
+      "title": "Base image (1 MP), saved"
     },
     {
       "id": 17,
-      "type": "ComfyMathExpression",
+      "type": "ResizeImageMaskNode",
       "pos": [
         2640,
         40
       ],
       "size": [
-        220,
-        120
+        320,
+        130
       ],
       "flags": {},
       "mode": 0,
       "inputs": [
         {
-          "label": "a",
-          "name": "values.a",
-          "type": "FLOAT,INT,BOOLEAN",
+          "localized_name": "input",
+          "name": "input",
+          "type": "IMAGE,MASK",
           "link": 19
+        },
+        {
+          "localized_name": "resize_type.multiplier",
+          "name": "resize_type.multiplier",
+          "type": "FLOAT",
+          "widget": {
+            "name": "resize_type.multiplier"
+          },
+          "link": null
         }
       ],
       "outputs": [
         {
-          "name": "FLOAT",
-          "type": "FLOAT",
-          "links": null
-        },
-        {
-          "name": "INT",
-          "type": "INT",
+          "localized_name": "resized",
+          "name": "resized",
+          "type": "IMAGE",
           "links": [
-            21
+            20,
+            32
           ]
-        },
-        {
-          "name": "BOOL",
-          "type": "BOOLEAN",
-          "links": null
         }
       ],
       "properties": {
+        "Node name for S&R": "ResizeImageMaskNode",
         "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "ComfyMathExpression"
+        "ver": "0.27.0"
       },
       "widgets_values": [
-        "a * 4"
+        "scale by multiplier",
+        2,
+        "lanczos"
       ],
-      "title": "Width x4"
+      "title": "Scale (2x of 1 MP fits 12 GB)"
     },
     {
       "id": 18,
-      "type": "ComfyMathExpression",
+      "type": "SeedVR2Preprocess",
       "pos": [
         2640,
-        200
+        220
       ],
       "size": [
-        220,
-        120
+        240,
+        50
       ],
       "flags": {},
       "mode": 0,
       "inputs": [
         {
-          "label": "a",
-          "name": "values.a",
-          "type": "FLOAT,INT,BOOLEAN",
+          "localized_name": "resized_images",
+          "name": "resized_images",
+          "type": "IMAGE",
           "link": 20
         }
       ],
       "outputs": [
         {
-          "name": "FLOAT",
-          "type": "FLOAT",
-          "links": null
-        },
-        {
-          "name": "INT",
-          "type": "INT",
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
           "links": [
-            22
+            21
           ]
-        },
-        {
-          "name": "BOOL",
-          "type": "BOOLEAN",
-          "links": null
         }
       ],
       "properties": {
+        "Node name for S&R": "SeedVR2Preprocess",
         "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "ComfyMathExpression"
+        "ver": "0.27.0"
       },
-      "widgets_values": [
-        "a * 4"
-      ],
-      "title": "Height x4"
+      "widgets_values": []
     },
     {
       "id": 19,
-      "type": "UNETLoader",
+      "type": "VAELoader",
       "pos": [
-        2900,
+        3000,
         40
       ],
       "size": [
-        420,
+        360,
+        60
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "vae_name",
+          "name": "vae_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "vae_name"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "VAE",
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            22,
+            30
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VAELoader",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
+        "models": [
+          {
+            "name": "seedvr2_ema_vae_fp16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/main/vae/seedvr2_ema_vae_fp16.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "seedvr2_ema_vae_fp16.safetensors"
+      ]
+    },
+    {
+      "id": 20,
+      "type": "UNETLoader",
+      "pos": [
+        3000,
+        140
+      ],
+      "size": [
+        360,
         90
       ],
       "flags": {},
       "mode": 0,
+      "showAdvanced": false,
       "inputs": [
         {
           "localized_name": "unet_name",
@@ -996,351 +1021,53 @@
           "name": "MODEL",
           "type": "MODEL",
           "links": [
-            28,
-            29
+            23,
+            25
           ]
         }
       ],
       "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
         "Node name for S&R": "UNETLoader",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0",
         "models": [
           {
-            "name": "pid_1.5_flux2_1024_to_4096_4step_bf16.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/PixelDiT/resolve/main/diffusion_models/pid_1.5_flux2_1024_to_4096_4step_bf16.safetensors",
+            "name": "seedvr2_7b_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/SeedVR2/resolve/main/diffusion_models/seedvr2_7b_int8_convrot.safetensors",
             "directory": "diffusion_models"
           }
         ]
       },
       "widgets_values": [
-        "pid_1.5_flux2_1024_to_4096_4step_bf16.safetensors",
-        "default"
-      ]
-    },
-    {
-      "id": 20,
-      "type": "CLIPLoader",
-      "pos": [
-        2900,
-        170
-      ],
-      "size": [
-        420,
-        110
-      ],
-      "flags": {},
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "clip_name",
-          "name": "clip_name",
-          "type": "COMBO",
-          "widget": {
-            "name": "clip_name"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CLIP",
-          "name": "CLIP",
-          "type": "CLIP",
-          "links": [
-            24
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "CLIPLoader",
-        "models": [
-          {
-            "name": "gemma_2_2b_it_elm_fp8_scaled.safetensors",
-            "url": "https://huggingface.co/Comfy-Org/PixelDiT/resolve/main/text_encoders/gemma_2_2b_it_elm_fp8_scaled.safetensors",
-            "directory": "text_encoders"
-          }
-        ]
-      },
-      "widgets_values": [
-        "gemma_2_2b_it_elm_fp8_scaled.safetensors",
-        "pixeldit",
+        "seedvr2_7b_int8_convrot.safetensors",
         "default"
       ]
     },
     {
       "id": 21,
-      "type": "VAELoader",
+      "type": "VAEEncodeTiled",
       "pos": [
-        2900,
+        2640,
         320
       ],
       "size": [
         300,
-        60
-      ],
-      "flags": {
-        "collapsed": true
-      },
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "localized_name": "VAE",
-          "name": "VAE",
-          "type": "VAE",
-          "links": [
-            36
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "VAELoader"
-      },
-      "widgets_values": [
-        "pixel_space"
-      ],
-      "color": "#322",
-      "bgcolor": "#533"
-    },
-    {
-      "id": 22,
-      "type": "CLIPTextEncode",
-      "pos": [
-        2640,
-        420
-      ],
-      "size": [
-        300,
-        100
+        160
       ],
       "flags": {},
       "mode": 0,
+      "showAdvanced": true,
       "inputs": [
         {
-          "localized_name": "clip",
-          "name": "clip",
-          "type": "CLIP",
-          "link": 24
-        },
-        {
-          "localized_name": "text",
-          "name": "text",
-          "type": "STRING",
-          "widget": {
-            "name": "text"
-          },
-          "link": 23
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CONDITIONING",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            25,
-            26
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "CLIPTextEncode"
-      },
-      "widgets_values": [
-        ""
-      ],
-      "color": "#232",
-      "bgcolor": "#353",
-      "title": "PiD prompt (same caption)"
-    },
-    {
-      "id": 23,
-      "type": "ConditioningZeroOut",
-      "pos": [
-        2640,
-        560
-      ],
-      "size": [
-        220,
-        50
-      ],
-      "flags": {
-        "collapsed": true
-      },
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "conditioning",
-          "name": "conditioning",
-          "type": "CONDITIONING",
-          "link": 25
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CONDITIONING",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            31
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "ConditioningZeroOut"
-      },
-      "widgets_values": [],
-      "color": "#223",
-      "bgcolor": "#335"
-    },
-    {
-      "id": 24,
-      "type": "PiDConditioning",
-      "pos": [
-        2640,
-        650
-      ],
-      "size": [
-        300,
-        110
-      ],
-      "flags": {},
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "positive",
-          "name": "positive",
-          "type": "CONDITIONING",
-          "link": 26
-        },
-        {
-          "localized_name": "latent",
-          "name": "latent",
-          "type": "LATENT",
-          "link": 27
-        },
-        {
-          "localized_name": "latent_format",
-          "name": "latent_format",
-          "type": "COMBO",
-          "widget": {
-            "name": "latent_format"
-          },
-          "link": null
-        },
-        {
-          "localized_name": "degrade_sigma",
-          "name": "degrade_sigma",
-          "type": "FLOAT",
-          "widget": {
-            "name": "degrade_sigma"
-          },
-          "link": null
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "CONDITIONING",
-          "name": "CONDITIONING",
-          "type": "CONDITIONING",
-          "links": [
-            30
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "PiDConditioning"
-      },
-      "widgets_values": [
-        "flux",
-        0
-      ],
-      "color": "#322",
-      "bgcolor": "#533"
-    },
-    {
-      "id": 25,
-      "type": "EmptyChromaRadianceLatentImage",
-      "pos": [
-        2980,
-        420
-      ],
-      "size": [
-        300,
-        110
-      ],
-      "flags": {},
-      "mode": 0,
-      "inputs": [
-        {
-          "localized_name": "width",
-          "name": "width",
-          "type": "INT",
-          "widget": {
-            "name": "width"
-          },
+          "localized_name": "pixels",
+          "name": "pixels",
+          "type": "IMAGE",
           "link": 21
         },
         {
-          "localized_name": "height",
-          "name": "height",
-          "type": "INT",
-          "widget": {
-            "name": "height"
-          },
+          "localized_name": "vae",
+          "name": "vae",
+          "type": "VAE",
           "link": 22
         }
       ],
@@ -1350,79 +1077,33 @@
           "name": "LATENT",
           "type": "LATENT",
           "links": [
-            34
+            24,
+            28
           ]
         }
       ],
       "properties": {
+        "Node name for S&R": "VAEEncodeTiled",
         "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "EmptyChromaRadianceLatentImage"
+        "ver": "0.27.0"
       },
       "widgets_values": [
+        512,
+        128,
         4096,
-        4096,
-        1
-      ],
-      "title": "Output size (4x base)"
-    },
-    {
-      "id": 26,
-      "type": "KSamplerSelect",
-      "pos": [
-        2980,
-        570
-      ],
-      "size": [
-        250,
-        60
-      ],
-      "flags": {},
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "localized_name": "SAMPLER",
-          "name": "SAMPLER",
-          "type": "SAMPLER",
-          "links": [
-            32
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "KSamplerSelect"
-      },
-      "widgets_values": [
-        "lcm"
+        8
       ]
     },
     {
-      "id": 27,
-      "type": "BasicScheduler",
+      "id": 22,
+      "type": "SeedVR2Conditioning",
       "pos": [
-        2980,
-        670
+        3000,
+        280
       ],
       "size": [
-        250,
-        110
+        260,
+        70
       ],
       "flags": {},
       "mode": 0,
@@ -1431,161 +1112,168 @@
           "localized_name": "model",
           "name": "model",
           "type": "MODEL",
-          "link": 29
-        }
-      ],
-      "outputs": [
-        {
-          "localized_name": "SIGMAS",
-          "name": "SIGMAS",
-          "type": "SIGMAS",
-          "links": [
-            33
-          ]
-        }
-      ],
-      "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "BasicScheduler"
-      },
-      "widgets_values": [
-        "simple",
-        4,
-        1
-      ]
-    },
-    {
-      "id": 28,
-      "type": "SamplerCustom",
-      "pos": [
-        3260,
-        420
-      ],
-      "size": [
-        300,
-        230
-      ],
-      "flags": {},
-      "mode": 0,
-      "showAdvanced": false,
-      "inputs": [
-        {
-          "localized_name": "model",
-          "name": "model",
-          "type": "MODEL",
-          "link": 28
+          "link": 23
         },
+        {
+          "label": "latent",
+          "localized_name": "vae_conditioning",
+          "name": "vae_conditioning",
+          "type": "LATENT",
+          "link": 24
+        }
+      ],
+      "outputs": [
         {
           "localized_name": "positive",
           "name": "positive",
           "type": "CONDITIONING",
-          "link": 30
+          "links": [
+            26
+          ]
         },
         {
           "localized_name": "negative",
           "name": "negative",
           "type": "CONDITIONING",
-          "link": 31
+          "links": [
+            27
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeedVR2Conditioning",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 23,
+      "type": "KSampler",
+      "pos": [
+        3000,
+        400
+      ],
+      "size": [
+        300,
+        300
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "model",
+          "name": "model",
+          "type": "MODEL",
+          "link": 25
         },
         {
-          "localized_name": "sampler",
-          "name": "sampler",
-          "type": "SAMPLER",
-          "link": 32
+          "localized_name": "positive",
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 26
         },
         {
-          "localized_name": "sigmas",
-          "name": "sigmas",
-          "type": "SIGMAS",
-          "link": 33
+          "localized_name": "negative",
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 27
         },
         {
           "localized_name": "latent_image",
           "name": "latent_image",
           "type": "LATENT",
-          "link": 34
+          "link": 28
         },
         {
-          "localized_name": "noise_seed",
-          "name": "noise_seed",
+          "localized_name": "seed",
+          "name": "seed",
           "type": "INT",
           "widget": {
-            "name": "noise_seed"
+            "name": "seed"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "sampler_name",
+          "name": "sampler_name",
+          "type": "COMBO",
+          "widget": {
+            "name": "sampler_name"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "scheduler",
+          "name": "scheduler",
+          "type": "COMBO",
+          "widget": {
+            "name": "scheduler"
+          },
+          "link": null
+        },
+        {
+          "localized_name": "denoise",
+          "name": "denoise",
+          "type": "FLOAT",
+          "widget": {
+            "name": "denoise"
           },
           "link": null
         }
       ],
       "outputs": [
         {
-          "localized_name": "output",
-          "name": "output",
+          "localized_name": "LATENT",
+          "name": "LATENT",
           "type": "LATENT",
           "links": [
-            35
+            29
           ]
-        },
-        {
-          "localized_name": "denoised_output",
-          "name": "denoised_output",
-          "type": "LATENT",
-          "links": null
         }
       ],
       "properties": {
+        "Node name for S&R": "KSampler",
         "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "SamplerCustom"
+        "ver": "0.27.0"
       },
       "widgets_values": [
-        true,
-        3,
+        959948902156062,
         "fixed",
+        1,
+        1,
+        "euler",
+        "simple",
         1
       ],
-      "title": "PiD sampler"
+      "title": "KSampler (one step, keep as is)"
     },
     {
-      "id": 29,
-      "type": "VAEDecode",
+      "id": 24,
+      "type": "VAEDecodeTiled",
       "pos": [
-        3260,
-        690
+        3400,
+        40
       ],
       "size": [
-        200,
-        50
+        300,
+        160
       ],
-      "flags": {
-        "collapsed": false
-      },
+      "flags": {},
       "mode": 0,
+      "showAdvanced": true,
       "inputs": [
         {
           "localized_name": "samples",
           "name": "samples",
           "type": "LATENT",
-          "link": 35
+          "link": 29
         },
         {
           "localized_name": "vae",
           "name": "vae",
           "type": "VAE",
-          "link": 36
+          "link": 30
         }
       ],
       "outputs": [
@@ -1594,36 +1282,88 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            37
+            31
           ]
         }
       ],
       "properties": {
+        "Node name for S&R": "VAEDecodeTiled",
         "cnr_id": "comfy-core",
-        "ver": "0.22.0",
-        "enableTabs": false,
-        "tabWidth": 65,
-        "tabXOffset": 10,
-        "hasSecondTab": false,
-        "secondTabText": "Send Back",
-        "secondTabOffset": 80,
-        "secondTabWidth": 65,
-        "Node name for S&R": "VAEDecode"
+        "ver": "0.27.0"
       },
-      "widgets_values": [],
-      "color": "#322",
-      "bgcolor": "#533"
+      "widgets_values": [
+        512,
+        128,
+        4096,
+        8
+      ]
     },
     {
-      "id": 30,
+      "id": 25,
+      "type": "SeedVR2PostProcessing",
+      "pos": [
+        3400,
+        240
+      ],
+      "size": [
+        320,
+        110
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 31
+        },
+        {
+          "localized_name": "original_resized_images",
+          "name": "original_resized_images",
+          "type": "IMAGE",
+          "link": 32
+        },
+        {
+          "localized_name": "color_correction_method",
+          "name": "color_correction_method",
+          "type": "COMBO",
+          "widget": {
+            "name": "color_correction_method"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            33
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeedVR2PostProcessing",
+        "cnr_id": "comfy-core",
+        "ver": "0.27.0"
+      },
+      "widgets_values": [
+        "lab"
+      ],
+      "title": "Colour match to the base"
+    },
+    {
+      "id": 26,
       "type": "SaveImage",
       "pos": [
-        3260,
-        780
+        3400,
+        400
       ],
       "size": [
         400,
-        260
+        400
       ],
       "flags": {},
       "mode": 0,
@@ -1631,7 +1371,7 @@
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 37
+          "link": 33
         }
       ],
       "outputs": [
@@ -1645,11 +1385,11 @@
         "Node name for S&R": "SaveImage"
       },
       "widgets_values": [
-        "flux3_klein_pid_4k"
+        "flux3_klein_2k"
       ]
     },
     {
-      "id": 31,
+      "id": 27,
       "type": "MarkdownNote",
       "pos": [
         0,
@@ -1665,7 +1405,7 @@
       "outputs": [],
       "properties": {},
       "widgets_values": [
-        "## FLUX 3 Image Klein + PiD, tuned for a 12 GB Arc B580\n\nType a short request in **Prompt**. The prompt upsampler expands it into the full scene caption Klein needs (BFL: never run Klein without one). The caption is shown in **Caption sent to the model**; turn **Use prompt upsampler** off to send your own caption verbatim.\n\nKlein (distilled, 15 steps, cfg 1) renders at about 1 MP, then PiD decodes that latent straight into a 4x image (1 MP in, 16 MP out) in 4 steps. The upsampler has a fixed seed, so rerolling the image seed reuses the cached caption and skips the LLM.\n\n### Files (under `/data/models/`)\n\n| Folder | File | Size |\n|---|---|---|\n| diffusion_models | flux3-image-klein-int8-convrot.safetensors | 5.8 GB |\n| text_encoders | qwen3vl_4b_int8_convrot.safetensors | 4.9 GB |\n| text_encoders | qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors | 6.7 GB |\n| vae | flux2-vae.safetensors | 0.3 GB |\n| diffusion_models | pid_1.5_flux2_1024_to_4096_4step_bf16.safetensors | 2.8 GB |\n| text_encoders | gemma_2_2b_it_elm_fp8_scaled.safetensors | 2.6 GB |\n\nThe first four come from [black-forest-labs/flux-3-image-klein-comfy](https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy) (gated: accept the license first), the last two from [Comfy-Org/PixelDiT](https://huggingface.co/Comfy-Org/PixelDiT).\n\n### Knobs\n- Aspect ratio: any preset in **Base resolution**; keep megapixels near 1.0, PiD is trained on 1024 px inputs.\n- Every file is sized to load completely on 12 GB. The bf16 Klein (11.1 GB) and the int8 upsampler (9.8 GB) would load only partially, which on Arc tends to end in `UR_RESULT_ERROR_OUT_OF_RESOURCES`.\n- PiD out of memory: `pid_flux2_512_to_2048_4step_bf16` with megapixels 0.25 gives 2K instead of 4K.\n"
+        "## FLUX 3 Image Klein + SeedVR2, tuned for a 12 GB Arc B580\n\nType a short request in **Prompt**. The prompt upsampler expands it into the full scene caption Klein needs (BFL: never run Klein without one). The caption is shown in **Caption sent to the model**; turn **Use prompt upsampler** off to send your own caption verbatim.\n\nKlein (distilled, 15 steps, cfg 1) renders at about 1 MP and that image is saved as is, then SeedVR2 7B restores and doubles it to about 2048 px in one step, colour-matched to the base. The upsampler is deterministic, so rerolling the image seed reuses the cached caption and skips the LLM.\n\n### Files (under `/data/models/`)\n\n| Folder | File | Size |\n|---|---|---|\n| diffusion_models | flux3-image-klein-int8-convrot.safetensors | 5.8 GB |\n| text_encoders | qwen3vl_4b_int8_convrot.safetensors | 4.9 GB |\n| text_encoders | qwen3.5_9b_flux3_prompt_upsampler_w4a8.safetensors | 6.7 GB |\n| vae | flux2-vae.safetensors | 0.3 GB |\n| diffusion_models | seedvr2_7b_int8_convrot.safetensors | 8.3 GB |\n| vae | seedvr2_ema_vae_fp16.safetensors | 0.5 GB |\n\nThe first four come from [black-forest-labs/flux-3-image-klein-comfy](https://huggingface.co/black-forest-labs/flux-3-image-klein-comfy) (gated: accept the license first), the last two from [Comfy-Org/SeedVR2](https://huggingface.co/Comfy-Org/SeedVR2).\n\n### Knobs\n- Aspect ratio: any preset in **Base resolution**. Keep megapixels near 1.0: Klein's sweet spot, and 2x of it is what SeedVR2 fits in 12 GB.\n- Every file loads completely on 12 GB. The bf16 Klein (11.1 GB) and the int8 upsampler (9.8 GB) would load only partially, which on Arc tends to end in `UR_RESULT_ERROR_OUT_OF_RESOURCES`.\n- Upscale out of memory: `seedvr2_3b_int8_convrot.safetensors` (3.5 GB). Crisper: the `seedvr2_7b_sharp_` variant, which can over-sharpen AI images.\n- Comparing settings: set the KSampler seed to `fixed`, otherwise every run is a different image.\n"
       ],
       "color": "#222",
       "bgcolor": "#000"
@@ -1818,153 +1558,121 @@
     ],
     [
       19,
-      7,
+      15,
       0,
       17,
       0,
-      "INT"
+      "IMAGE"
     ],
     [
       20,
-      7,
-      1,
-      18,
-      0,
-      "INT"
-    ],
-    [
-      21,
       17,
-      1,
-      25,
       0,
-      "INT"
-    ],
-    [
-      22,
       18,
-      1,
-      25,
-      1,
-      "INT"
+      0,
+      "IMAGE"
     ],
     [
-      23,
-      6,
+      21,
+      18,
       0,
-      22,
-      1,
-      "STRING"
-    ],
-    [
-      24,
-      20,
-      0,
-      22,
-      0,
-      "CLIP"
-    ],
-    [
-      25,
-      22,
-      0,
-      23,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      26,
-      22,
-      0,
-      24,
-      0,
-      "CONDITIONING"
-    ],
-    [
-      27,
-      14,
-      0,
-      24,
-      1,
-      "LATENT"
-    ],
-    [
-      28,
-      19,
-      0,
-      28,
-      0,
-      "MODEL"
-    ],
-    [
-      29,
-      19,
-      0,
-      27,
-      0,
-      "MODEL"
-    ],
-    [
-      30,
-      24,
-      0,
-      28,
-      1,
-      "CONDITIONING"
-    ],
-    [
-      31,
-      23,
-      0,
-      28,
-      2,
-      "CONDITIONING"
-    ],
-    [
-      32,
-      26,
-      0,
-      28,
-      3,
-      "SAMPLER"
-    ],
-    [
-      33,
-      27,
-      0,
-      28,
-      4,
-      "SIGMAS"
-    ],
-    [
-      34,
-      25,
-      0,
-      28,
-      5,
-      "LATENT"
-    ],
-    [
-      35,
-      28,
-      0,
-      29,
-      0,
-      "LATENT"
-    ],
-    [
-      36,
       21,
       0,
-      29,
+      "IMAGE"
+    ],
+    [
+      22,
+      19,
+      0,
+      21,
       1,
       "VAE"
     ],
     [
-      37,
-      29,
+      23,
+      20,
       0,
+      22,
+      0,
+      "MODEL"
+    ],
+    [
+      24,
+      21,
+      0,
+      22,
+      1,
+      "LATENT"
+    ],
+    [
+      25,
+      20,
+      0,
+      23,
+      0,
+      "MODEL"
+    ],
+    [
+      26,
+      22,
+      0,
+      23,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      27,
+      22,
+      1,
+      23,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      28,
+      21,
+      0,
+      23,
+      3,
+      "LATENT"
+    ],
+    [
+      29,
+      23,
+      0,
+      24,
+      0,
+      "LATENT"
+    ],
+    [
       30,
+      19,
+      0,
+      24,
+      1,
+      "VAE"
+    ],
+    [
+      31,
+      24,
+      0,
+      25,
+      0,
+      "IMAGE"
+    ],
+    [
+      32,
+      17,
+      0,
+      25,
+      1,
+      "IMAGE"
+    ],
+    [
+      33,
+      25,
+      0,
+      26,
       0,
       "IMAGE"
     ]
@@ -1998,11 +1706,11 @@
     },
     {
       "id": 3,
-      "title": "3  PiD: latent straight to a 4x image",
+      "title": "3  SeedVR2 7B: restore and upscale 2x",
       "bounding": [
         2600,
         -40,
-        1100,
+        1500,
         1100
       ],
       "color": "#593f35",
